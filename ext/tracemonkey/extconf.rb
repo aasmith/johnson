@@ -4,6 +4,7 @@
 # so the debugging flags are extracted from the config defs and passed to the ext build.
 
 ENV["RC_ARCHS"] = "" if RUBY_PLATFORM =~ /darwin/
+ENV["MAKE"] ||= RUBY_PLATFORM =~ /freebsd/ ? "gmake" : "make"
 
 require "find"
 require "mkmf"
@@ -34,7 +35,7 @@ Dir.chdir tracemonkey_dir do
     # debug = `egrep MOZ_DEBUG_DISABLE_DEFS config/autoconf.mk`
   end
   cflags.concat debug.sub( %r(^.*=\s*), "" ).split.map { |f| f.sub %r(^-), "" }
-  system "make" or raise "could not make tracemonkey" if Dir["**/libjs_static.a"].empty?
+  system ENV["MAKE"] or raise "could not make tracemonkey" if Dir["**/libjs_static.a"].empty?
 end
 
 libjs = Dir[tracemonkey_dir + "/**/libjs_static.a"].first
